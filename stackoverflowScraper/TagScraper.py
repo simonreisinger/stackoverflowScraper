@@ -2,11 +2,14 @@ import sys
 import requests
 import re
 from bs4 import BeautifulSoup
+import time
 
 # https://stackoverflow.com/tags
 # https://stackoverflow.com/questions/tagged/three.js
+
+
 class TagScraper:
-    #
+
     def __inf__(self):
         """
         creates an TagScraper Object
@@ -14,7 +17,8 @@ class TagScraper:
         pass
 
     # https://stackoverflow.com/questions/tagged/three.js?page=1&sort=newest&pagesize=50
-    def scrapeTagForTags (self):
+    @staticmethod
+    def scrapetagfortags():
         placeToStoreResults = "../results/"
 
         searchURL = "https://threejs.org/docs"
@@ -24,44 +28,47 @@ class TagScraper:
         pagesize = 50  # 15, 30 or 50
 
         # Preparing Files
-        nameTagFile = placeToStoreResults + tag + ".txt"  # Name of text file coerced with +.txt
-        tagFile = open(nameTagFile, 'w') # ATTENTION: overwrites file
+        nametagfile = placeToStoreResults + tag + ".txt"  # Name of text file coerced with +.txt
+        tagfile = open(nametagfile, 'w') # ATTENTION: overwrites file
 
-        totalUrlForPageNumber = "" + url + tag + "?page=1&sort=" + sort + "&pagesize=" + str(pagesize)
-        rForPageNumber = requests.post(totalUrlForPageNumber)
-        bsForPageNumber = BeautifulSoup(rForPageNumber.content, 'html.parser')
-        pagenNumbers = bsForPageNumber.find_all("span", {'class':"page-numbers"})
+        totalurlforpagenumber = "" + url + tag + "?page=1&sort=" + sort + "&pagesize=" + str(pagesize)
+        rforpagenumber = requests.post(totalurlforpagenumber)
+        bsForPageNumber = BeautifulSoup(rforpagenumber.content, 'html.parser')
+        pagenNumbers = bsForPageNumber.find_all("span", {'class': "page-numbers"})
         maxPageNr = int(pagenNumbers[len(pagenNumbers)-2].contents[0])
 
         print("All pages: " + str(maxPageNr))
-        for page in range(1, maxPageNr):
+        for page in range(89, 150):
             totalUrl = "" + url + tag + "?page=" + str(page) + "&sort=" + sort + "&pagesize=" + str(pagesize)
             r = requests.post(totalUrl)
             totalQuestionOverview = BeautifulSoup(r.content, 'html.parser')
-            findLinks = totalQuestionOverview.find_all("a", {'class':"question-hyperlink"})  # 50 Elements
-            #i = 0
+            findLinks = totalQuestionOverview.find("div", {"id": "mainbar"}).find_all("a", {'class':"question-hyperlink"})  # 50 Elements
+
             print("current page: " + str(page))
+
+            # print(findLinks)
+
             for link in findLinks:
                 finishedUrl = "https://stackoverflow.com" + link.get("href")
+                # print(finishedUrl)
 
                 rQuestion = requests.get(finishedUrl)
                 soupQuestion = BeautifulSoup(rQuestion.content, 'html.parser')
                 allUrlsOnPage = soupQuestion.find_all(href=re.compile(searchURL))
-                if(len(allUrlsOnPage) > 0):
-                    tagFile.writelines(finishedUrl + "\n")
+                if len(allUrlsOnPage) > 0:
+                    tagfile.writelines(finishedUrl + "\n")
+                    print(finishedUrl)
                 for urlOnPage in allUrlsOnPage:
                     hrefx = urlOnPage.get("href")
-                    tagFile.writelines(hrefx + "\n")
+                    tagfile.writelines(hrefx + "\n")
                     print(hrefx)
-                if(len(allUrlsOnPage) > 0):
-                    tagFile.writelines("\n")
+                if len(allUrlsOnPage) > 0:
+                    tagfile.writelines("\n")
+                time.sleep( 50 )
 
-                #if(i == 1):
-                #    break
-                #i = i+1
+        tagfile.close()
 
-        tagFile.close()
 
 if __name__ == "__main__":
     tagScraper = TagScraper()
-    tagScraper.scrapeTagForTags()
+    tagScraper.scrapetagfortags()
