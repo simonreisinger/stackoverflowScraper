@@ -20,8 +20,9 @@ class TagScraper:
     @staticmethod
     def scrapetagfortags():
         placeToStoreResults = "../results/"
-
-        searchURL = "https://threejs.org/docs"
+        
+        # TODO auf arry zusammenfassen
+        searchURLs = ["https://threejs.org/docs", "http://threejs.org/docs"]
         tag = "three.js"
         url = "https://stackoverflow.com/questions/tagged/"
         sort = "newest"
@@ -38,7 +39,7 @@ class TagScraper:
         maxPageNr = int(pagenNumbers[len(pagenNumbers)-2].contents[0])
 
         print("All pages: " + str(maxPageNr))
-        for page in range(89, 150):
+        for page in range(20, 75):
             totalUrl = "" + url + tag + "?page=" + str(page) + "&sort=" + sort + "&pagesize=" + str(pagesize)
             r = requests.post(totalUrl)
             totalQuestionOverview = BeautifulSoup(r.content, 'html.parser')
@@ -51,20 +52,23 @@ class TagScraper:
             for link in findLinks:
                 finishedUrl = "https://stackoverflow.com" + link.get("href")
                 # print(finishedUrl)
+                for searchURL in searchURLs:
+                    rQuestion = requests.get(finishedUrl)
+                    soupQuestion = BeautifulSoup(rQuestion.content, 'html.parser')
+                    allUrlsOnPage = soupQuestion.find_all(href=re.compile(searchURL))
+                    if len(allUrlsOnPage) > 0:
+                        tagfile.writelines(finishedUrl + "\n")
+                        print(finishedUrl)
+                    for urlOnPage in allUrlsOnPage:
+                        hrefx = urlOnPage.get("href")
+                        tagfile.writelines(hrefx + "\n")
+                        print(hrefx)
+                    if len(allUrlsOnPage) > 0:
+                        tagfile.writelines("\n")
+                    time.sleep( 5 )
 
-                rQuestion = requests.get(finishedUrl)
-                soupQuestion = BeautifulSoup(rQuestion.content, 'html.parser')
-                allUrlsOnPage = soupQuestion.find_all(href=re.compile(searchURL))
-                if len(allUrlsOnPage) > 0:
-                    tagfile.writelines(finishedUrl + "\n")
-                    print(finishedUrl)
-                for urlOnPage in allUrlsOnPage:
-                    hrefx = urlOnPage.get("href")
-                    tagfile.writelines(hrefx + "\n")
-                    print(hrefx)
-                if len(allUrlsOnPage) > 0:
-                    tagfile.writelines("\n")
-                time.sleep( 50 )
+
+
 
         tagfile.close()
 
