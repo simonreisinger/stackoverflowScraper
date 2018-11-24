@@ -22,7 +22,7 @@ class TagScraper:
         placeToStoreResults = "../results/"
         
         # TODO auf arry zusammenfassen
-        searchURLs = ["https://threejs.org/docs", "http://threejs.org/docs"]
+        searchURLs = ["https://threejs.org/docs", "http://threejs.org/docs", "threejs.org/docs"] #TODO das letzte muesste reichen check this
         tag = "three.js"
         url = "https://stackoverflow.com/questions/tagged/"
         sort = "newest"
@@ -39,7 +39,8 @@ class TagScraper:
         maxPageNr = int(pagenNumbers[len(pagenNumbers)-2].contents[0])
 
         print("All pages: " + str(maxPageNr))
-        for page in range(20, 75):
+        for page in range(43, 75):
+            print("Current pages: " + str(page))
             totalUrl = "" + url + tag + "?page=" + str(page) + "&sort=" + sort + "&pagesize=" + str(pagesize)
             r = requests.post(totalUrl)
             totalQuestionOverview = BeautifulSoup(r.content, 'html.parser')
@@ -66,10 +67,6 @@ class TagScraper:
                     if len(allUrlsOnPage) > 0:
                         tagfile.writelines("\n")
                     time.sleep( 5 )
-
-
-
-
         tagfile.close()
 
 
