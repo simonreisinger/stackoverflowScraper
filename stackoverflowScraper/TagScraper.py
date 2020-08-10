@@ -6,7 +6,7 @@ import time
 
 # https://stackoverflow.com/tags
 # https://stackoverflow.com/questions/tagged/three.js
-
+# Tool that iterates over all questions under a certain tag to find links. Can be used to replace broken links.
 
 class TagScraper:
 
